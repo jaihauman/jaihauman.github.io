@@ -1,0 +1,253 @@
+hello here is code&nbsp;<html lang="en">
+
+  <box>
+  <head>
+    <meta charset="UTF-8"></meta>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"></meta>
+    <title>Quiz Website</title>
+    <style>
+       
+
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 480p;
+            max-width: 480px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            background-color: #f7f7f7;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            background-color: #003f8a;
+            transform: translateY(0);
+        }
+
+        .score-box {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .correct-answer {
+            background-color: lightgreen;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .wrong-answer {
+            background-color: lightcoral;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .option-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .option-button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .option-button:active {
+            background-color: #d0d0d0;
+            transform: translateY(0);
+        }
+
+        .option-button.selected {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz</h1>
+        <div id="quiz-container">
+            <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+        </div>
+        <div class="timer" id="timer-container" style="display: none;">
+            <p>Time left: <span id="timer">30</span> seconds</p>
+        </div>
+    </div>
+    <script>
+       const questions = [
+    { question: "राजस्थान के प्रथम मुख्यमंत्री कौन थे?", options: ["हीरालाल शास्त्री", "मोहनलाल सुखाड़िया", "जय नारायण व्यास", "टीकाराम पालीवाल"], correctAnswer: "हीरालाल शास्त्री" },
+    { question: "राजस्थान के सर्वाधिक समय तक मुख्यमंत्री कौन रहे?", options: ["मोहनलाल सुखाड़िया", "भैरोंसिंह शेखावत", "अशोक गहलोत", "वसुंधरा राजे"], correctAnswer: "मोहनलाल सुखाड़िया" },
+    { question: "अशोक गहलोत कितनी बार राजस्थान के मुख्यमंत्री बने हैं?", options: ["तीन", "दो", "चार", "एक"], correctAnswer: "तीन" },
+    { question: "वसुंधरा राजे सिंधिया किस राजनीतिक दल से हैं?", options: ["भारतीय जनता पार्टी", "भारतीय राष्ट्रीय कांग्रेस", "बहुजन समाज पार्टी", "राष्ट्रीय लोकतांत्रिक पार्टी"], correctAnswer: "भारतीय जनता पार्टी" },
+    { question: "भैरोंसिंह शेखावत कितनी बार राजस्थान के मुख्यमंत्री रहे?", options: ["तीन", "दो", "एक", "चार"], correctAnswer: "तीन" },
+    { question: "राजस्थान के किस मुख्यमंत्री का कार्यकाल सबसे कम रहा?", options: ["हीरालाल शास्त्री", "टीकाराम पालीवाल", "जगन्नाथ पहाड़िया", "शिवचरण माथुर"], correctAnswer: "टीकाराम पालीवाल" },
+    { question: "मोहनलाल सुखाड़िया किस जिले से थे?", options: ["उदयपुर", "जोधपुर", "जयपुर", "कोटा"], correctAnswer: "उदयपुर" },
+    { question: "राजस्थान की प्रथम महिला मुख्यमंत्री कौन थीं?", options: ["वसुंधरा राजे", "गिरिजा व्यास", "सुमित्रा सिंह", "प्रभा ठाकुर"], correctAnswer: "वसुंधरा राजे" },
+    { question: "अशोक गहलोत का जन्म कहाँ हुआ था?", options: ["जोधपुर", "जयपुर", "उदयपुर", "अजमेर"], correctAnswer: "जोधपुर" },
+    { question: "राजस्थान के किस मुख्यमंत्री का सम्बन्ध किसान आंदोलन से रहा है?", options: ["भैरोंसिंह शेखावत", "मोहनलाल सुखाड़िया", "हरिदेव जोशी", "शिवचरण माथुर"], correctAnswer: "भैरोंसिंह शेखावत" },
+    { question: "जगन्नाथ पहाड़िया किस समुदाय से थे?", options: ["दलित", "ब्राह्मण", "राजपूत", "वैश्य"], correctAnswer: "दलित" },
+    { question: "शिवचरण माथुर किस जिले से थे?", options: ["भीलवाड़ा", "अजमेर", "कोटा", "बूंदी"], correctAnswer: "भीलवाड़ा" },
+    { question: "हरिदेव जोशी कितनी बार राजस्थान के मुख्यमंत्री बने?", options: ["तीन", "दो", "एक", "कभी नहीं"], correctAnswer: "तीन" },
+    { question: "राजस्थान में राष्ट्रपति शासन कितनी बार लगा है?", options: ["चार", "तीन", "दो", "एक"], correctAnswer: "चार" },
+    { question: "किस मुख्यमंत्री के कार्यकाल में राजस्थान में पंचायती राज व्यवस्था लागू हुई?", options: ["मोहनलाल सुखाड़िया", "भैरोंसिंह शेखावत", "अशोक गहलोत", "हरिदेव जोशी"], correctAnswer: "मोहनलाल सुखाड़िया" },
+    { question: "राजस्थान के किस मुख्यमंत्री को 'आधुनिक राजस्थान का निर्माता' कहा जाता है?", options: ["मोहनलाल सुखाड़िया", "भैरोंसिंह शेखावत", "हरिदेव जोशी", "हीरालाल शास्त्री"], correctAnswer: "मोहनलाल सुखाड़िया" },
+    { question: "टीकाराम पालीवाल किस पार्टी से थे?", options: ["कांग्रेस", "जनता पार्टी", "स्वतंत्र पार्टी", "भारतीय जनता पार्टी"], correctAnswer: "कांग्रेस" },
+    { question: "राजस्थान के किस मुख्यमंत्री का कार्यकाल सबसे विवादित रहा?", options: ["जगन्नाथ पहाड़िया", "शिवचरण माथुर", "हरिदेव जोशी", "भैरोंसिंह शेखावत"], correctAnswer: "जगन्नाथ पहाड़िया" },
+    { question: "राजस्थान के किस मुख्यमंत्री ने आपातकाल के दौरान जेल में समय बिताया?", options: ["भैरोंसिंह शेखावत", "मोहनलाल सुखाड़िया", "हरिदेव जोशी", "शिवचरण माथुर"], correctAnswer: "भैरोंसिंह शेखावत" },
+    { question: "वर्तमान में राजस्थान के राज्यपाल कौन हैं (2023 के अनुसार)?", options: ["कलराज मिश्र", "मार्गरेट अल्वा", "शिवराज पाटिल", "राम नाइक"], correctAnswer: "कलराज मिश्र" } // Added a related question
+];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+        let userAnswers = [];
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('timer-container').style.display = 'block';
+            startTimer();
+            loadQuestion();
+        }
+
+        function startTimer() {
+            let timeLeft = 30;
+            document.getElementById('timer').textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            const quizContainer = document.getElementById('quiz-container');
+            const question = questions[currentQuestionIndex];
+            quizContainer.innerHTML = `
+                <h2>Question ${currentQuestionIndex + 1}: ${question.question}</h2>
+                ${question.options.map(option => `
+                    <button class="option-button ${userAnswers[currentQuestionIndex] === option ? 'selected' : ''}" onclick="selectOption('${option}')">${option}</button>
+                `).join('')}
+                <div class="nav-buttons">
+                    <button onclick="previousQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>Back</button>
+                    <button onclick="nextQuestion()">Next</button>
+                </div>
+            `;
+        }
+
+        function selectOption(option) {
+            userAnswers[currentQuestionIndex] = option;
+            document.querySelectorAll('.option-button').forEach(button => {
+                button.classList.remove('selected');
+                if (button.textContent === option) {
+                    button.classList.add('selected');
+                }
+            });
+        }
+
+        function nextQuestion() {
+            if (userAnswers[currentQuestionIndex] === questions[currentQuestionIndex].answer) {
+                score++;
+            }
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                clearInterval(timer);
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+
+        function showResults() {
+            const quizContainer = document.getElementById('quiz-container');
+            document.getElementById('timer-container').style.display = 'none';
+            let resultsHTML = `
+                <h2>Quiz Completed!</h2>
+                <div class="score-box">Your score: ${score} / ${questions.length}</div>
+                <button onclick="showAnswers()">Show Answers</button>
+                <div id="answers-container" style="display: none;">
+                    <h3>Correct and Incorrect Answers:</h3>
+            `;
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.answer;
+                resultsHTML += `
+                    <div>
+                        <p><strong>Question ${index + 1}:</strong> ${question.question}</p>
+                        <p><strong>Your answer:</strong> <span class="${isCorrect ? 'correct-answer' : 'wrong-answer'}">${userAnswer || "No answer selected"}</span></p>
+                        <p><strong>Correct answer:</strong> ${question.answer}</p>
+                    </div>
+                    <hr>
+                `;
+            });
+            resultsHTML += `<div class="score-box">Your final score: ${score} / ${questions.length}</div></div>`;
+            resultsHTML += `<button onclick="restartQuiz()">Restart Quiz</button>`;
+            quizContainer.innerHTML = resultsHTML;
+        }
+
+        function showAnswers() {
+            document.getElementById('answers-container').style.display = 'block';
+        }
+
+        function restartQuiz() {
+            document.getElementById('quiz-container').innerHTML = `
+                <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+            `;
+        }
+    </script>
+</body>
+</html>
+ </box>
