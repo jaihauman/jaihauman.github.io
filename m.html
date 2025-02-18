@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .quiz-container {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        #timer {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .correct {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .wrong {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container" id="quiz-container">
+        <div id="timer">Time left: 02:00</div>
+        <div id="question-container">
+            <div id="question">Question text</div>
+            <div id="answer-buttons" class="btn-container">
+                <!-- Answer buttons will be appended here -->
+            </div>
+        </div>
+        <button id="next-btn" class="btn hide">Next</button>
+    </div>
+    <script>
+        const questions = [
+            {
+                question: 'What is the capital of France?',
+                answers: [
+                    { text: 'Berlin', correct: false },
+                    { text: 'Madrid', correct: false },
+                    { text: 'Paris', correct: true },
+                    { text: 'Lisbon', correct: false }
+                ]
+            },
+            {
+                question: 'Who is CEO of Tesla?',
+                answers: [
+                    { text: 'Jeff Bezos', correct: false },
+                    { text: 'Elon Musk', correct: true },
+                    { text: 'Bill Gates', correct: false },
+                    { text: 'Tony Stark', correct: false }
+                ]
+            },
+            // Add more questions as needed
+        ];
+
+        const nextButton = document.getElementById('next-btn');
+        const questionContainerElement = document.getElementById('question-container');
+        const questionElement = document.getElementById('question');
+        const answerButtonsElement = document.getElementById('answer-buttons');
+        const timerElement = document.getElementById('timer');
+
+        let shuffledQuestions, currentQuestionIndex;
+        let timeLeft = 120;
+        let timerInterval;
+
+        function startQuiz() {
+            shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            timeLeft = 120;
+            startTimer();
+            setNextQuestion();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `Time left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function setNextQuestion() {
+            resetState();
+            showQuestion(shuffledQuestions[currentQuestionIndex]);
+        }
+
+        function showQuestion(question) {
+            questionElement.textContent = question.question;
+            question.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.textContent = answer.text;
+                button.classList.add('btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsElement.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextButton.classList.add('hide');
+            while (answerButtonsElement.firstChild) {
+                answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correct = selectedButton.dataset.correct;
+            Array.from(answerButtonsElement.children).forEach(button => {
+                setStatusClass(button, button.dataset.correct);
+            });
+            if (shuffledQuestions.length > currentQuestionIndex + 1) {
+                nextButton.classList.remove('hide');
+            } else {
+                showResults();
+            }
+        }
+
+        function setStatusClass(element, correct) {
+            clearStatusClass(element);
+            if (correct) {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('wrong');
+            }
+        }
+
+        function clearStatusClass(element) {
+            element.classList.remove('correct');
+            element.classList.remove('wrong');
+        }
+
+        function showResults() {
+            clearInterval(timerInterval);
+            questionContainerElement.innerHTML = `<h2>Quiz Over</h2>`;
+        }
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+
+        startQuiz();
+    </script>
+</body>
+</html>
+``` ▋
