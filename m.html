@@ -108,11 +108,12 @@
         let shuffledQuestions, currentQuestionIndex;
         let timeLeft = 120;
         let timerInterval;
-        let score = 0;
+        let answers = [];
 
         startButton.addEventListener('click', startQuiz);
 
         nextButton.addEventListener('click', () => {
+            saveAnswer();
             currentQuestionIndex++;
             setNextQuestion();
         });
@@ -130,7 +131,7 @@
             prevButton.classList.remove('hide');
             shuffledQuestions = questions.sort(() => Math.random() - 0.5);
             currentQuestionIndex = 0;
-            score = 0;
+            answers = new Array(shuffledQuestions.length).fill(null);
             timeLeft = 120;
             startTimer();
             setNextQuestion();
@@ -163,6 +164,13 @@
                 button.addEventListener('click', selectAnswer);
                 answerButtonsElement.appendChild(button);
             });
+            if (answers[currentQuestionIndex] !== null) {
+                Array.from(answerButtonsElement.children).forEach(button => {
+                    if (button.textContent === answers[currentQuestionIndex].text) {
+                        button.classList.add('selected');
+                    }
+                });
+            }
         }
 
         function resetState() {
@@ -176,18 +184,33 @@
             }
             if (currentQuestionIndex < shuffledQuestions.length - 1) {
                 nextButton.classList.remove('hide');
+            } else {
+                nextButton.textContent = 'Finish';
+                nextButton.classList.remove('hide');
+                nextButton.addEventListener('click', showResults);
             }
         }
 
         function selectAnswer(e) {
             const selectedButton = e.target;
-            const correct = shuffledQuestions[currentQuestionIndex].answers.find(answer => answer.text === selectedButton.textContent).correct;
-            if (correct) {
-                score++;
-            }
             Array.from(answerButtonsElement.children).forEach(button => {
-                button.disabled = true;
+                button.classList.remove('selected');
             });
+            selectedButton.classList.add('selected');
+            answers[currentQuestionIndex] = {
+                text: selectedButton.textContent,
+                correct: shuffledQuestions[currentQuestionIndex].answers.find(answer => answer.text === selectedButton.textContent).correct
+            };
+        }
+
+        function saveAnswer() {
+            const selectedButton = Array.from(answerButtonsElement.children).find(button => button.classList.contains('selected'));
+            if (selectedButton) {
+                answers[currentQuestionIndex] = {
+                    text: selectedButton.textContent,
+                    correct: shuffledQuestions[currentQuestionIndex].answers.find(answer => answer.text === selectedButton.textContent).correct
+                };
+            }
         }
 
         function showResults() {
@@ -197,7 +220,17 @@
             nextButton.classList.add('hide');
             prevButton.classList.add('hide');
             scoreContainer.classList.remove('hide');
-            scoreElement.textContent = `You scored ${score} out of ${shuffledQuestions.length}`;
+
+            const correctAnswers = answers.filter(answer => answer && answer.correct).length;
+            scoreElement.textContent = `You scored ${correctAnswers} out of ${shuffledQuestions.length}.`;
+
+            const detailedScore = document.createElement('ul');
+            answers.forEach((answer, index) => {
+                const li = document.createElement('li');
+                li.textContent = `Question ${index + 1}: ${answer ? (answer.correct ? 'Correct' : 'Wrong') : 'No answer'}`;
+                detailedScore.appendChild(li);
+            });
+            scoreContainer.appendChild(detailedScore);
         }
     </script>
 </body>
