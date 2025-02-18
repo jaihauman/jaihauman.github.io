@@ -115,10 +115,15 @@
         nextButton.addEventListener('click', () => {
             saveAnswer();
             currentQuestionIndex++;
-            setNextQuestion();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                setNextQuestion();
+            } else {
+                showResults();
+            }
         });
 
         prevButton.addEventListener('click', () => {
+            saveAnswer();
             currentQuestionIndex--;
             setNextQuestion();
         });
@@ -183,11 +188,11 @@
                 prevButton.classList.remove('hide');
             }
             if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                nextButton.textContent = 'Next';
                 nextButton.classList.remove('hide');
             } else {
                 nextButton.textContent = 'Finish';
                 nextButton.classList.remove('hide');
-                nextButton.addEventListener('click', showResults);
             }
         }
 
