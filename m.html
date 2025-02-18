@@ -48,16 +48,6 @@
             margin-bottom: 20px;
         }
 
-        .correct {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .wrong {
-            background-color: #dc3545;
-            color: white;
-        }
-
         .hide {
             display: none;
         }
@@ -65,14 +55,22 @@
 </head>
 <body>
     <div class="quiz-container" id="quiz-container">
-        <div id="timer">Time left: 02:00</div>
-        <div id="question-container">
+        <button id="start-btn" class="btn">Start Quiz</button>
+        <div id="timer" class="hide">Time left: 02:00</div>
+        <div id="question-container" class="hide">
             <div id="question">Question text</div>
             <div id="answer-buttons" class="btn-container">
                 <!-- Answer buttons will be appended here -->
             </div>
         </div>
-        <button id="next-btn" class="btn hide">Next</button>
+        <div class="btn-container">
+            <button id="prev-btn" class="btn hide">Previous</button>
+            <button id="next-btn" class="btn hide">Next</button>
+        </div>
+        <div id="score-container" class="hide">
+            <h2>Scorecard</h2>
+            <p id="score"></p>
+        </div>
     </div>
     <script>
         const questions = [
@@ -97,19 +95,42 @@
             // Add more questions as needed
         ];
 
+        const startButton = document.getElementById('start-btn');
         const nextButton = document.getElementById('next-btn');
+        const prevButton = document.getElementById('prev-btn');
         const questionContainerElement = document.getElementById('question-container');
         const questionElement = document.getElementById('question');
         const answerButtonsElement = document.getElementById('answer-buttons');
         const timerElement = document.getElementById('timer');
+        const scoreContainer = document.getElementById('score-container');
+        const scoreElement = document.getElementById('score');
 
         let shuffledQuestions, currentQuestionIndex;
         let timeLeft = 120;
         let timerInterval;
+        let score = 0;
+
+        startButton.addEventListener('click', startQuiz);
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+
+        prevButton.addEventListener('click', () => {
+            currentQuestionIndex--;
+            setNextQuestion();
+        });
 
         function startQuiz() {
+            startButton.classList.add('hide');
+            timerElement.classList.remove('hide');
+            questionContainerElement.classList.remove('hide');
+            nextButton.classList.remove('hide');
+            prevButton.classList.remove('hide');
             shuffledQuestions = questions.sort(() => Math.random() - 0.5);
             currentQuestionIndex = 0;
+            score = 0;
             timeLeft = 120;
             startTimer();
             setNextQuestion();
@@ -139,9 +160,6 @@
                 const button = document.createElement('button');
                 button.textContent = answer.text;
                 button.classList.add('btn');
-                if (answer.correct) {
-                    button.dataset.correct = answer.correct;
-                }
                 button.addEventListener('click', selectAnswer);
                 answerButtonsElement.appendChild(button);
             });
@@ -149,49 +167,38 @@
 
         function resetState() {
             nextButton.classList.add('hide');
+            prevButton.classList.add('hide');
             while (answerButtonsElement.firstChild) {
                 answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+            }
+            if (currentQuestionIndex > 0) {
+                prevButton.classList.remove('hide');
+            }
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                nextButton.classList.remove('hide');
             }
         }
 
         function selectAnswer(e) {
             const selectedButton = e.target;
-            const correct = selectedButton.dataset.correct;
-            Array.from(answerButtonsElement.children).forEach(button => {
-                setStatusClass(button, button.dataset.correct);
-            });
-            if (shuffledQuestions.length > currentQuestionIndex + 1) {
-                nextButton.classList.remove('hide');
-            } else {
-                showResults();
-            }
-        }
-
-        function setStatusClass(element, correct) {
-            clearStatusClass(element);
+            const correct = shuffledQuestions[currentQuestionIndex].answers.find(answer => answer.text === selectedButton.textContent).correct;
             if (correct) {
-                element.classList.add('correct');
-            } else {
-                element.classList.add('wrong');
+                score++;
             }
-        }
-
-        function clearStatusClass(element) {
-            element.classList.remove('correct');
-            element.classList.remove('wrong');
+            Array.from(answerButtonsElement.children).forEach(button => {
+                button.disabled = true;
+            });
         }
 
         function showResults() {
             clearInterval(timerInterval);
-            questionContainerElement.innerHTML = `<h2>Quiz Over</h2>`;
+            questionContainerElement.classList.add('hide');
+            timerElement.classList.add('hide');
+            nextButton.classList.add('hide');
+            prevButton.classList.add('hide');
+            scoreContainer.classList.remove('hide');
+            scoreElement.textContent = `You scored ${score} out of ${shuffledQuestions.length}`;
         }
-
-        nextButton.addEventListener('click', () => {
-            currentQuestionIndex++;
-            setNextQuestion();
-        });
-
-        startQuiz();
     </script>
 </body>
 </html>
